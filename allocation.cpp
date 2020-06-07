@@ -1,17 +1,16 @@
 #include <bits/stdc++.h>
 
-#define MAX 200023
-#define M 200017
-
 // 積載量Pに対して積むことのできる
 // 荷物の数を返す
-int BaggageAmount(int P, std::vector<int> vecW, int& idx) {
+int BaggageAmount(int P, std::vector<int> vecW, int& idx, int n) {
     int sum = 0;
     int i = 0;
     // 積載量P以下の限り
     // 順番に荷物を積み続ける
     while (true) {
-        if (sum + vecW[idx] > P) break;
+        // 積載量Pを超える前に終了
+        if (sum + vecW[idx+i] > P) break;
+        if (i == n) break;
         sum += vecW[idx+i];
         i++;
     }
@@ -21,36 +20,47 @@ int BaggageAmount(int P, std::vector<int> vecW, int& idx) {
 
 int main()
 {
-    int n, k, w, sum;
-    std::vector<int> vecW;
+    int n = 0;
+    int k = 0;
+    int w = 0;
+    int sum = 0;
+    std::vector<int> vecW (200000, 0);
 
     // 荷物の個数を取得
     std::cin >> n;
-   // std::cout << n << "\n";
 
     // トラックの台数を取得
     std::cin >> k;
-    //std::cout << k << "\n";
 
     for (int i = 0; i < n; i++)
     {
         std::cin >> w;
-        vecW.push_back(w);
+        vecW[i] = w;
     }
-    //std::cout << BaggageAmount(10, vecW) << "\n";
 
     int P = 0;
     int idx = 0;
-    while (sum < n) {
+    int left = 0;
+
+    // 必要積載量 P の最大値 = 積載量荷物 * 重量の最大値
+    int right = 100000 * 10000;
+    int mid = 0;
+
+    // 二分木探索で最小となるPを探す
+    while (right > left) {
         sum = 0;
         idx = 0;
-        P++;
+        mid = (right + left) / 2;
         for (int i = 0; i < k; i++)
         {
-            sum += BaggageAmount(P, vecW, idx);
-            std::cout << "P = " << P <<"idx = "<< idx <<"\n";
+            sum += BaggageAmount(mid, vecW, idx, n);
+        }
+        if (sum < n) {
+            left = mid + 1;
+        } else {
+            right = mid;
         }
     }
-    std::cout << P <<"\n";
+    std::cout << right <<"\n";
     return 0;
 }
