@@ -16,18 +16,24 @@ void CountingSort(vector<int>& vecA, vector<int>& vecB, int k, int n)
     }
     
     // vecC[i]にiの出現数を記録する
-    for (int j = 1; j <= n; j++)
+    for (int j = 0; j < n; j++)
     {
         vecC[vecA[j]] = vecC[vecA[j]] + 1;
     }
 
-    // vecC[i]にi以下の数の出現数を記録する
-    for (int i = 1; i <= k; i++)
+    // vecC[i]にi以下の数の出現数を記録する(累積和)
+    // どこまで計算すればよいかは、
+    // 入力された数値が何種類あるかによって異なるため
+    // 想定された入力数より多くループさせる
+    for (int i = 1; i < k; i++)
     {
         vecC[i] = vecC[i] + vecC[i-1];
     }
 
-    for (int j = n; j >= 1; j--) {
+    // 出力配列にソートした結果を詰めていく
+    // 入力配列の末尾から逆に辿っていくことで
+    // 安定ソートになる
+    for (int j = n-1; j >= 0; j--) {
         vecB[vecC[vecA[j]]] = vecA[j];
         vecC[vecA[j]] = vecC[vecA[j]] - 1;
     }
@@ -48,14 +54,18 @@ int main() {
     {
         scanf("%d",&m);
         vec_in[i] = m;
-        //printf("%d\n", vec_in[i]);
     }
 
+    // 計数ソート
     CountingSort(vec_in, vec_out, VALMAX, n);
 
-    for (int i = 0; i < n; i++)
+    // 開始インデックスを1始まりとしているのは
+    // カウンタ配列vecC[x]には入力配列にx以下の要素がいくつ
+    // 記録されているかを示しているので
+    // idx = 0は飛ばす(出現回数=0なので存在しない)
+    for (int i = 1; i <= n; i++)
     {
-        if (i == n - 1)
+        if (i == n)
         {
             printf("%d\n", vec_out[i]);
         }
@@ -64,5 +74,4 @@ int main() {
             printf("%d ", vec_out[i]);
         }
     }
-
 }
