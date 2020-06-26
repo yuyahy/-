@@ -5,22 +5,7 @@ typedef long long llong;
 // 予想される要素の最大値以上の値(番兵)
 #define INFTY 2000000000
 
-int BubbleSort(vector<int>& vecA, int n)
-{
-  int cnt = 0; // 反転数
-
-  for (int i = 0; i < n; i++) {
-    for (int j = n-1; i < j; j--) {
-        if (vecA[j] < vecA[j-1]) {
-            swap(vecA[j], vecA[j-1]);
-            cnt++;
-        }
-    }
-  }
-  return cnt;
-}
-
-// 
+// 反転数をマージソートを利用して求める
 int merge(vector<int>& vec, int left, int mid, int right)
 {
     int n1 = mid - left;
@@ -58,16 +43,12 @@ int merge(vector<int>& vec, int left, int mid, int right)
     // 安定なソートとなる
     for (int k = left; k < right; k++)
     {
-        // if (vec_L[i] <= vec_R[j]) {
-        //     vec[k] = vec_L[i];
-        //     i++;
-        // } else {
-        //     vec[k] = vec_R[j];
-        //     j++;
-        // }
-        // cnt++;
-        if (vec_L[i] < vec_R[j] && j < i) {
-            cnt++;
+        if (vec_L[i] <= vec_R[j]) {
+            vec[k] = vec_L[i++];
+        } else {
+            vec[k] = vec_R[j++];
+            // 反転数を求める
+            cnt += n1 - i;
         }
     }
     return cnt;
