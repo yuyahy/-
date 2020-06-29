@@ -30,7 +30,8 @@ void PrintChildren(int iNode) {
     int child = T[iNode].left;
     while (child != NIL)
     {
-        printf("%d\n",child);
+        //printf("%d\n",child);
+        cout << child << "\n";
         child = T[iNode].right;
     }
     
@@ -38,26 +39,34 @@ void PrintChildren(int iNode) {
 
 void PrintResult(int iNode) {
     int i, c;
-    printf("node %d: ", iNode);
-    printf("parent = %d, ", T[iNode].parent);
-    printf("depth = %d, ", Depth[iNode]);
+    // printf("node %d: ", iNode);
+    // printf("parent = %d, ", T[iNode].parent);
+    // printf("depth = %d, ", Depth[iNode]);
+    cout << "node " << iNode <<": \n";
+    cout << "parent = " << T[iNode].parent << ", \n";
+    cout << "depth = " << Depth[iNode] << ", \n";
 
     if (T[iNode].parent != NIL) {
-        printf("root, ");
+        //printf("root, ");
+        cout << "root, ";
     } else if (T[iNode].left == NIL) {
-        printf("leaf, ");
+        //printf("leaf, ");
+        cout << "leaf, ";
     } else {
-        printf("internal node, ");
+        //printf("internal node, ");
+        cout << "internal node, ";
     }
 
     printf("[");
 
     for (i = 0; c = T[iNode].left; c != NIL, i++, c = T[c].right)
     {
-        if (i) printf(", ");
-        printf("%d",c);
+        if (i) cout << ", ";//printf(", ");
+        //printf("%d",c);
+        cout << c;
     }
-    printf("]");
+    //printf("]");
+    cout << "]";
 }
 
 int main() {
@@ -65,24 +74,51 @@ int main() {
   int n = 0;
   // 次数
   int iDeg = 0;
+  int iNodeIdx = 0;
+  int left,node,root;
 
-  scanf("%d", &n);
+  cin >> n;
+  // 初期化
+  for (int i = 0; i < n; ++i)
+  {
+      T[i].parent = T[i].left = T[i].right = NIL;
+  }
 
   for (int i = 0; i < n; i++)
   {
       // 次数を取得
-      scanf("%d", &iDeg);
+      cin >> iDeg >> iNodeIdx;
       for (int k = 0; k < iDeg; k++)
       {
+          cin >> node;
           if (k == 0)
           {
               // 一番左の子を取得
-              scanf("%d", &T[i].left);
+              T[i].left = node;
           }
           else
           {
-
+              T[left].right = node;
           }
+          left = node;
+          T[node].parent = iNodeIdx;
       }
   }
+   // rootを探す
+  for (int i = 0; i < n; ++i)
+  {
+      if (T[i].parent == NIL)
+      {
+          root = i;
+      }
+  }
+
+   // 根からはじめて深さを代入する
+   rec(root,0);
+
+   // 4.nodeのindexごとに出力する
+    for(int i = 0;i < n;++i){
+        PrintResult(i);
+    }
+    return 0;
 }
