@@ -19,10 +19,17 @@ int GetDepth(int iNode) {
     return iDepth;
 }
 
-// 再帰的に木構造の節点の深さを求める
-int rec(int iNode, int p) {
-    Depth[iNode] = p;
-    if (T[iNode].right != NIL) rec(T[iNode].right, p);
+// 再帰的に深さを求める
+void rec(int node,int parent){
+    Depth[node] = parent;
+    if(T[node].right != NIL){
+        // 右の兄弟に同じ深さを設定
+        rec(T[node].right,parent);
+    }
+    if(T[node].left != NIL){
+        // 最も左の子に自分の深さ+1を設定
+        rec(T[node].left,parent + 1);
+    }
 }
 
 // 子のリストを表示する
@@ -57,7 +64,8 @@ void PrintResult(int iNode) {
         cout << "internal node, ";
     }
 
-    printf("[");
+    //printf("[");
+    cout << "[";
 
     for (i = 0; c = T[iNode].left; c != NIL, i++, c = T[c].right)
     {
@@ -69,56 +77,78 @@ void PrintResult(int iNode) {
     cout << "]";
 }
 
+void Print(int node){
+    cout << "node " << node << ": ";
+    cout << "parent = " << T[node].parent << ", ";
+    cout << "depth = " << Depth[node] << ", ";
+    
+    if(T[node].parent == NIL) cout << "root, ";
+    else if(T[node].left == NIL)cout << "leaf, ";
+    else cout << "internal node, ";
+    
+    cout << "[";
+    
+    for(int i = 0,left = T[node].left;left != NIL;++i,left = T[left].right){
+        if(i) cout << ", ";
+        cout << left;
+    }
+    cout << "]" << endl;
+}
+
 int main() {
-  // 節点の個数
-  int n = 0;
-  // 次数
-  int iDeg = 0;
-  int iNodeIdx = 0;
-  int left,node,root;
+    // 節点の個数
+    int n = 0;
+    // 次数
+    int iDeg = 0;
+    int iNodeIdx = 0;
+    int left, node, root;
 
-  cin >> n;
-  // 初期化
-  for (int i = 0; i < n; ++i)
-  {
-      T[i].parent = T[i].left = T[i].right = NIL;
-  }
+    cin >> n;
+    // 初期化
+    for (int i = 0; i < n; ++i)
+    {
+        T[i].parent = T[i].left = T[i].right = NIL;
+    }
 
-  for (int i = 0; i < n; i++)
-  {
-      // 次数を取得
-      cin >> iDeg >> iNodeIdx;
-      for (int k = 0; k < iDeg; k++)
-      {
-          cin >> node;
-          if (k == 0)
-          {
-              // 一番左の子を取得
-              T[i].left = node;
-          }
-          else
-          {
-              T[left].right = node;
-          }
-          left = node;
-          T[node].parent = iNodeIdx;
-      }
-  }
-   // rootを探す
-  for (int i = 0; i < n; ++i)
-  {
-      if (T[i].parent == NIL)
-      {
-          root = i;
-      }
-  }
+    for (int i = 0; i < n; i++)
+    {
+        // 次数を取得
+        cin >> iDeg >> iNodeIdx;
+        //cout << iDeg << " " << iNodeIdx <<"\n";
+        for (int k = 0; k < iNodeIdx; k++)
+        {
+            //cout << "iDeg = " <<iDeg;
+            cin >> node;
+            if (k == 0)
+            {
+                // 一番左の子を取得
+                T[i].left = node;
+            }
+            else
+            {
+                T[left].right = node;
+            }
+            left = node;
+            T[node].parent = iDeg;
+        }
+    }
+    // rootを探す
+    //cout << "// rootを探す";
+    for (int i = 0; i < n; ++i)
+    {
+        if (T[i].parent == NIL)
+        {
+            root = i;
+        }
+    }
 
-   // 根からはじめて深さを代入する
-   rec(root,0);
+    // 根からはじめて深さを代入する
+    rec(root, 0);
 
-   // 4.nodeのindexごとに出力する
-    for(int i = 0;i < n;++i){
-        PrintResult(i);
+    // 4.nodeのindexごとに出力する
+    for (int i = 0; i < n; ++i)
+    {
+        Print(i);
     }
     return 0;
 }
