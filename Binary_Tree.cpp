@@ -24,17 +24,25 @@ void rec(int node,int parent){
         rec(iNode[node].left,parent + 1);
         rec(iNode[node].right,parent + 1);
     } else {
-        Depth_MAX = parent;
+        if (parent > Depth_MAX) Depth_MAX = parent;
     }
 }
 
 // 再帰的に高さを求める
-void Rec_Height(int node, int parent) {
-    if (iNode[node].left == NIL && iNode[node].right == NIL) {
-        Height[node] = parent;
-    } else if(iNode[node].left == NIL && iNode[node].right != NIL) {
-
+int Rec_Height(int node, int parent,int cnt_right,int cnt_left) {
+    int cnt_right_tmp = cnt_right;
+    int cnt_left_tmp = cnt_left;
+    // 末端についたら終了
+    if(iNode[node].right == NIL && iNode[node].left == NIL) {
+        Height[node] = 0;
+        return 1;
     }
+    // それ以外の場合は再帰
+    else {
+        cnt_left += Rec_Height(iNode[node].left, parent, cnt_right,cnt_left);
+        cnt_right += Rec_Height(iNode[node].right, parent, cnt_right,cnt_left);
+    }
+    Height[node] = cnt_left>cnt_right? cnt_left : cnt_right;
 }
 
 // 与えられたノードの兄弟を返す
@@ -66,19 +74,11 @@ void Print(int node){
         cout << "degree = " << BINARY_CHILDREN_NUM << ", ";
     }
     cout << "depth = " << Depth[node] << ", ";
-    cout << "height = " << Depth_MAX - Depth[node] << ", ";
+    cout << "height = " << Height[node] << ", ";
     if(iNode[node].parent == NIL) cout << "root";
     else if(iNode[node].left == NIL)cout << "leaf";
     else cout << "internal node";
     cout << "\n";
-    
-    // cout << "[";
-    
-    // for(int i = 0,left = iNode[node].left;left != NIL;++i,left = iNode[left].right){
-    //     if(i) cout << ", ";
-    //     cout << left;
-    // }
-    // cout << "]" << endl;
 }
 
 int main() {
@@ -131,7 +131,10 @@ int main() {
     }
 
     // 根からはじめて深さを代入する
-    rec(root, 0);
+    rec(root, Depth_MAX);
+
+    // 根からはじめて高さを代入する
+    Rec_Height(root, Depth_MAX, 0, 0);
 
     // Nodeのindexごとに出力する
     for (int i = 0; i < n; ++i)
