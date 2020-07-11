@@ -14,42 +14,55 @@ Node iNode[MAX];
 int n, Depth[MAX], Height[MAX];
 int Depth_MAX;
 
-// 与えられたノードが巡回済みか判定する
-bool IsNodeInVector(int node, vector<int>& vec_inOrder) {
-    for (auto& x : vec_inOrder) {
-        if (x == node) return true;
-    }
-    return false;
-}
-
 // 根から先行順巡回を行う
 // 親→左部分木→右部分木の順
 void PreOrder(int node, vector<int>& vec_inOrder)
 {
-    // 重複して節点が記録される事を避けるチェック
-    if (IsNodeInVector(node, vec_inOrder))
-    {
-        //既に登録した節点の場合は何もしない
-    }
-    else
-    {
-        vec_inOrder.push_back(node);
-    }
-
-    if (vec_inOrder.size() == n) return;
+    vec_inOrder.push_back(node);
 
     // 左部分木をチェック
-    if (iNode[node].left != NIL && !IsNodeInVector(node, vec_inOrder)) {
+    if (iNode[node].left != NIL) {
         PreOrder(iNode[node].left, vec_inOrder);
-    // 右部分木をチェック
-    } else if (iNode[node].right != NIL && !IsNodeInVector(node, vec_inOrder)) {
-        PreOrder(iNode[node].right, vec_inOrder);
-    // 葉まで辿りついたら兄弟を探す
-    } else {
-        // 兄弟が見つかる親まで戻る
-        cout << node << "\n";
-        PreOrder(iNode[node].parent, vec_inOrder);
     }
+    // 右部分木をチェック
+    if (iNode[node].right != NIL) {
+        PreOrder(iNode[node].right, vec_inOrder);
+    }
+}
+
+// 根から先行順巡回を行う
+// 左部分木→親→右部分木の順
+void InOrder(int node, vector<int>& vec_inOrder)
+{
+    // 左部分木をチェック
+    if (iNode[node].left != NIL) {
+        InOrder(iNode[node].left, vec_inOrder);
+    }
+        vec_inOrder.push_back(node);
+
+    // 右部分木をチェック
+    if (iNode[node].right != NIL)
+    {
+        InOrder(iNode[node].right, vec_inOrder);
+    }
+}
+
+// 根から後行順巡回を行う
+// 左部分木→右部分木→親の順
+void PostOrder(int node, vector<int>& vec_inOrder)
+{
+    // 左部分木をチェック
+    if (iNode[node].left != NIL) {
+        PostOrder(iNode[node].left, vec_inOrder);
+    }
+    
+    // 右部分木をチェック
+    if (iNode[node].right != NIL)
+    {
+        PostOrder(iNode[node].right, vec_inOrder);
+    }
+
+    vec_inOrder.push_back(node);
 }
 
 int main() {
@@ -103,22 +116,53 @@ int main() {
         }
     }
 
-    // 根からはじめて深さを代入する
-    //rec(root, Depth_MAX);
-
-    // 根からはじめて高さを代入する
-    //Rec_Height(root);
-
-    vector<int> vec_inOrder;
+    // 先行順巡回、 中間順巡回、後行順巡回
+    vector<int> vec_preOrder, vec_inOrder, vec_postOrder;
+    vec_preOrder.reserve(MAX);
     vec_inOrder.reserve(MAX);
-    PreOrder(root, vec_inOrder);
+    vec_postOrder.reserve(MAX);
 
-    for (int i=0; i<vec_inOrder.size(); i++) {
-        if (i == vec_inOrder.size() - 1) {
-            cout << vec_inOrder[i] <<"\n";
+    PreOrder(root, vec_preOrder);
+
+    InOrder(root, vec_inOrder);
+
+    PostOrder(root, vec_postOrder);
+
+    // 結果を出力する
+    cout << "Preorder" <<"\n";
+    for (int i=0; i<vec_preOrder.size(); i++) {
+        if (i == vec_preOrder.size() - 1) {
+            cout << " " << vec_preOrder[i] <<"\n";
         } else {
-            cout << vec_inOrder[i] <<" ";
+            cout << " " << vec_preOrder[i];
         }
     }
+
+    cout << "Inorder" << "\n";
+    for (int i = 0; i < vec_inOrder.size(); i++)
+    {
+        if (i == vec_inOrder.size() - 1)
+        {
+            cout << " " << vec_inOrder[i] << "\n";
+        }
+        else
+        {
+             cout << " " << vec_inOrder[i];
+        }
+    }
+
+    cout << "Postorder" << "\n";
+    for (int i = 0; i < vec_postOrder.size(); i++)
+    {
+        if (i == vec_postOrder.size() - 1)
+        {
+            cout << " " << vec_postOrder[i] << "\n";
+        }
+        else
+        {
+            cout << " " << vec_postOrder[i];
+        }
+    }
+
     return 0;
 }
