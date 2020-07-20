@@ -2,17 +2,13 @@
 #include <string>
 using namespace std;
 typedef long long llong;
-#define MAX 200000
-// 二分木の子の数(葉以外)
-#define BINARY_CHILDREN_NUM 2
-// 二分木の子の数(葉)
-#define BINARY_LEAF_CHILDREN_NUM 0
 
+// 二分木の定義
 struct Node {
     int key;
     Node *left, *right, *parent;
     };
-
+// 根・葉を定義
 Node *root, *NIL;
 
 //  二分木に新しい値を挿入する
@@ -40,6 +36,7 @@ void insert(int key)
 
     z->parent = y;
 
+    // 要素を配置する場所を決定する
     if (y == NIL) { // T が空の場合
         root = z;
     }
@@ -86,7 +83,7 @@ void InOrder(Node* node)
 
 void PrintVec()
 {
-    // 先行順巡回、 中間順巡回、後行順巡回
+    // 先行順巡回、 中間順巡回
     InOrder(root);
     cout << "\n";
     PreOrder(root);
