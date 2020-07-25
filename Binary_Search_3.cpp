@@ -72,28 +72,66 @@ bool find(Node* node, int key)
     return false;
 }
 
-// 根から中間順巡回を行う
-// 左部分木→親→右部分木の順
-Node* VecInOrder(Node* node, int key)
+void DeleteNoChildren(Node* node, int key, bool isRight)
 {
-    // 左部分木をチェック
-    if (node->left != NIL) {
-        VecInOrder(node->left, key);
-    }
-    cout << " " << node->key;
-    if (node->parent->key == key) return node;
+        if (isRight)
+        {
+            node->parent->right = NIL;
+        }
+        else
+        {
+            node->parent->left = NIL;
+        }
+        node = NIL;
+        return;
+}
 
-    // 右部分木をチェック
-    if (node->right != NIL)
-    {
-        VecInOrder(node->right, key);
+void DeleteOneChild(Node* node, int key, bool isRight, bool ischildright)
+{
+        // 自身が親に対して右、子を右にだけ持つ場合
+        if (isRight && ischildright) {
+            node->parent->right = node->right;
+            node->right->parent = node->parent;
+        } else if(!isRight && ischildright) {
+            node->parent->left = node->right;
+            node->right->parent = node->parent;
+        } else if(isRight && !ischildright) {
+            node->parent->right = node->left;
+            node->left->parent = node->parent;
+        } else {
+            node->parent->left = node->left;
+            node->left->parent = node->parent;
+        }
+        node = NIL;
+        return;
+}
+
+// 次節点を求める
+Node* next_node(Node *node) {
+  Node *x;
+  
+  // 右部分木を保つ場合は
+  // その中で最小のキーを持つノードが次節点
+  if (node->right != NIL) {
+    x = node->right;
+    while (x->left != NIL) {
+      x = x->left;
     }
+  // 右部分木がない場合は
+  // 親を辿っていって最初にでてくる左部分木が次節点
+  } else {    
+    x = node;    
+    while (x->parent != NIL && x == x->parent->right) {
+      x = x->parent;
+    }
+    x = x->parent;
+  }
+  return x;
 }
 
 // 指定されたキーを探し削除する
 void Binary_Tree_delete(Node* node, int key) 
 {
-    vector<int> vecResNodes;
     // 指定キーの場所を探す
     while (node != NIL) {
     // 二分木の特性を利用して場合分け
@@ -112,69 +150,68 @@ void Binary_Tree_delete(Node* node, int key)
         }
     }
 
+    bool isright;
+    // 指定キーが親の左右どちらの子か判定する
+    if (node->parent != NIL) {
+        isright = (node->parent->right->key == node->key)? true : false;
+    }
+
     // 指定キー配下に子がいない場合
     Node* ParentNode = node->parent;
     if (node->right == NIL && node->left == NIL)
     {
-        if (ParentNode->right->key == key)
-        {
-            ParentNode->right = NIL;
-        }
-        else
-        {
-            ParentNode->left = NIL;
-        }
-        node = NIL;
+        DeleteNoChildren(node, key, isright);
         return;
     }
 
     // 指定キー配下に一個だけ子がいる場合
+    Node* ChildNode_right = node->right;
+    bool isChildright;
     if (node->right != NIL && node->left == NIL)
     {
-        ParentNode->right = node->right;
-        node->right->parent = ParentNode->right;
-        node = NIL;
+        DeleteOneChild(node, key, isright, true);
         return;
+
     } else if(node->right == NIL && node->left != NIL) {
-        ParentNode->left = node->left;
-        node->left->parent = ParentNode->left;
-        node = NIL;
+        DeleteOneChild(node, key, isright, false);
         return;
     }
 
     // 指定キー配下に二個子がいる場合
     if (node->right != NIL && node->left != NIL) {
         // 指定キーの次節点を得る
-        Node* tgtnode = VecInOrder(root, key);
+        Node* tgtnode;
+
+
+        tgtnode = next_node(node);
+
         node->key = tgtnode->key;
-        if (tgtnode->right == NIL && tgtnode->left == NIL)
-        {
-            if (tgtnode->parent->right->key == key)
-            {
-                tgtnode->parent->right = NIL;
-            }
-            else
-            {
-                tgtnode->parent->left = NIL;
-            }
+
+        bool istgtright = false;
+
+        if (tgtnode->parent->right != NIL && tgtnode->parent->right->key == tgtnode->key) {
+            istgtright = true;
         }
 
-        if (tgtnode->right != NIL && tgtnode->left == NIL)
+        if (tgtnode->right == NIL && tgtnode->left == NIL)
         {
-            tgtnode->parent->right = tgtnode->right;
-            tgtnode->right->parent = tgtnode->parent->right;
-            tgtnode = NIL;
+            DeleteNoChildren(tgtnode, tgtnode->key, istgtright);
             return;
         }
+
+        else if (tgtnode->right != NIL && tgtnode->left == NIL)
+        {
+            DeleteOneChild(tgtnode, tgtnode->key, istgtright, true);
+            return;
+        }
+
         else if (tgtnode->right == NIL && tgtnode->left != NIL)
         {
-            tgtnode->parent->left = tgtnode->left;
-            tgtnode->left->parent = tgtnode->parent->left;
-            tgtnode = NIL;
+            DeleteOneChild(tgtnode, tgtnode->key, istgtright, false);
             return;
         }
-        return;
     }
+    return;
 }
 
 // 根から先行順巡回を行う
