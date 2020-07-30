@@ -9,7 +9,7 @@ typedef long long llong;
 // 空きノードを示す定数
 #define NIL 2100000000
 // 要素の最大数
-#define MAX 300
+#define MAX 600000
 
 
 // 完全二分木ヒープの定義
@@ -73,7 +73,7 @@ int main()
     // 各ノードに対して、
     // その節点番号、子の情報を、
     // 記憶していく
-    for (int i = 1; i < n+1; i++)
+    for (int i = 1; i < H+1; i++)
     {
         //キーを取得
         cin >> iNodeIdx;
@@ -93,11 +93,14 @@ int main()
 
     BuildMaxHeap(Heap);
 
-    for (int i = 0; i < H; i++)
+    for (int i = 1; i < H+1; i++)
     {
-        cout << Heap[i].key << " ";
+        if (i == H) {
+            cout << " " << Heap[i].key << "\n";
+        } else {
+            cout << " " << Heap[i].key;
+        }
     }
-    
 
     return 0;
 }
