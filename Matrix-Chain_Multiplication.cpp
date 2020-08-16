@@ -1,52 +1,37 @@
 #include <bits/stdc++.h>
 using namespace std;
 typedef long long llong;
-#define MAX 200
+#define MAX 100
+#define INFTY 9999999
 
 // 行列群を保持しておく
-vector<pair<int, int>> vecpairMatrix(MAX);
-//int dp[MAX][MAX][MAX];
-int dp[MAX];
+vector<int> vecMtr(MAX);
+// 結果を記録しておく
+vector<vector<int>> dp(MAX,vector<int>(MAX));
 
+// 連鎖行列積問題を解く
 int
-MultipleMatrixChain(vector<pair<int, int>> vecpairMatrix)
+MultipleMatrixChain(int size)
 {
-  // 初期値
-  dp[0]= 0;
-  for (int i = 0; i < vecpairMatrix.size(); i++)
+  // 初期化
+  for (int i = 1; i < size; i++)
   {
-    // M1*(M2*M3)
-    int cost1 = (vecpairMatrix[i].first * vecpairMatrix[i].second * vecpairMatrix[i+2].second) +
-    (vecpairMatrix[i+1].first * vecpairMatrix[i+1].second * vecpairMatrix[i+2].second);
-
-    // (M1*M2)*M3
-    int cost2 = (vecpairMatrix[i].first * vecpairMatrix[i].second * vecpairMatrix[i+1].second) +
-    (vecpairMatrix[i].first * vecpairMatrix[i+2].first * vecpairMatrix[i+2].second);
-    dp[i+1] = min(cost1, cost2) + dp[i];
-    cout << dp[i] << endl;
+    dp[i][i] = 0;
   }
-
-  // }
-  // for (int i = 0; i < vecpairMatrix.size(); i++)
-  // {
-  //   for (int j = 0; j < vecpairMatrix.size(); j++)
-  //   {
-  //     for (int k = 0; k < vecpairMatrix.size(); k++)
-  //     {
-  //       // M1*(M2*M3)
-  //       int cost1 = (vecpairMatrix[i].first * vecpairMatrix[i].second * vecpairMatrix[i+2].second) +
-  //       (vecpairMatrix[i+1].first * vecpairMatrix[i+1].second * vecpairMatrix[i+2].second);
-
-  //       // (M1*M2)*M3
-  //       int cost2 = (vecpairMatrix[i].first * vecpairMatrix[i].second * vecpairMatrix[i+1].second) +
-  //       (vecpairMatrix[i].first * vecpairMatrix[i+2].first * vecpairMatrix[i+2].second);
-  //       dp[i+1][j+1][k+1] = min(cost1, cost2) + dp[i][j][k];
-  //     }
-      
-  //   }
-  // }
-  //return dp[vecpairMatrix.size()][vecpairMatrix.size()][vecpairMatrix.size()];
-  return dp[vecpairMatrix.size()];
+  
+  for (int l = 2; l <= size; l++)
+  {
+    for (int i = 1; i <= size-l+1; i++)
+    {
+      int j = i + l - 1;
+      dp[i][j] = INFTY;
+      for (int k = i; k <= j-1; k++)
+      {
+        dp[i][j] = min(dp[i][j], dp[i][k] + dp[k+1][j]+ vecMtr[i-1]*vecMtr[k]*vecMtr[j]);
+      }
+    }
+  }
+  return dp[1][size];
 }
 
 int main() {
@@ -56,12 +41,12 @@ int main() {
   int r = 0;
   int c = 0;
 
-  for (int i = 0; i < n; i++)
+  for (int i = 1; i <= n; i++)
   {
       cin >> r >> c;
-      vecpairMatrix[i].first = r;
-      vecpairMatrix[i].second = c;
+      vecMtr[i-1] = r;
+      vecMtr[i] = c;
   }
   
-  cout << MultipleMatrixChain(vecpairMatrix) << "\n";
+  cout << MultipleMatrixChain(n) << "\n";
 }
