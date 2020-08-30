@@ -1,10 +1,15 @@
 #include <bits/stdc++.h>
 using namespace std;
+// 比較用に十分大きい数値とする
 constexpr int MAX = 9999999;
 
+// 頂点の探索状態を表す
 enum Vertex_State {
+    // 未訪問
     NOT_VISIT = 0,
+    // 訪問中(行きだけ)
     VISITING,
+    // 訪問完了(行き・帰り)
     COMPLETE,
 };
 
@@ -29,6 +34,8 @@ struct VertexInfo {
     }
 };
 
+// 指定された頂点に隣接する頂点群に
+// 未訪問の頂点が存在するかを返す
 bool
 IsAnyNoVisitNextVertex(map<int, VertexInfo>& mapGraph, int num_vertex)
 {
@@ -55,11 +62,14 @@ DepthFirstSearch(map<int, VertexInfo>& mapGraph, const int num_start_vertex)
     int time(1);
     auto itr = mapGraph.find(num_start_vertex);
     itr->second.time_found = time;
+    itr->second.state = Vertex_State::VISITING;
     stkVertex.push(itr->second.id_vertex);
 
     while (stkVertex.size() > 0)
     {
         time++;
+        itr = mapGraph.find(stkVertex.top());
+
         // 隣接する頂点が無かった場合
         if(!IsAnyNoVisitNextVertex(mapGraph,stkVertex.top())) {
             itr->second.time_complete = time;
@@ -83,6 +93,37 @@ DepthFirstSearch(map<int, VertexInfo>& mapGraph, const int num_start_vertex)
             itr->second.time_found = time;
             stkVertex.push(min);
         }
+
+        // スタックのサイズが0でも、開始点から直接行けないが
+        // まだ訪問していない頂点が残っている可能性があるので調べる
+        if(stkVertex.size() == 0)
+        {
+            // 頂点の移動が必要なので時間を加算する
+            time++;
+            for(auto& vertex : mapGraph)
+            {
+                // 未訪問の頂点が残っていたら
+                // 状態を訪問中に切り替えて、
+                // スタックに詰めて再開する
+                if(vertex.second.state == Vertex_State::NOT_VISIT) {
+                    stkVertex.push(vertex.second.id_vertex);
+                    vertex.second.state = Vertex_State::VISITING;
+                    vertex.second.time_found = time;
+                    break;
+                }
+            }
+        }
+    }
+}
+
+// 各頂点の訪問開始・終了時刻を出力する
+void
+PrintResult(map<int, VertexInfo> mapGraph)
+{
+    for(auto vertex : mapGraph)
+    {
+        cout << vertex.second.id_vertex << " " << vertex.second.time_found << " "
+        << vertex.second.time_complete << "\n";
     }
 }
 
@@ -122,8 +163,11 @@ main()
         mapGraph.insert(regpair);
     }
 
+    // 深さ優先探索
     DepthFirstSearch(mapGraph, num_start_vertex);
 
     // 結果の出力
+    PrintResult(mapGraph);
+
     return 0;
 }
