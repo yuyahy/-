@@ -19,18 +19,22 @@ struct UserInfo {
     int user_id;
     // 友達のリスト
     vector<int> vecFriend;
+    // 頂点の状態を表す
+    Vertex_State state;
+
     UserInfo(){
         user_id = 0;
+        state = NOT_VISIT;
     }
 };
 
 // 指定された頂点に隣接する頂点群に
 // 未訪問の頂点が存在するかを返す
 bool
-IsAnyNoVisitNextVertex(map<int, VertexInfo>& mapGraph, int num_vertex)
+IsAnyNoVisitNextVertex(map<int, UserInfo>& mapGraph, int num_vertex)
 {
     auto itr = mapGraph.find(num_vertex);
-    for(auto vertex : itr->second.vecNextVertex)
+    for(auto vertex : itr->second.vecFriend)
     {
         auto tgtitr = mapGraph.find(vertex);
         // まだ訪問していない隣接頂点が見つかった
@@ -44,25 +48,27 @@ IsAnyNoVisitNextVertex(map<int, VertexInfo>& mapGraph, int num_vertex)
 
 // 深さ優先でグラフを探索し、
 // 発見時刻と完了時刻を記録する
-void
-DepthFirstSearch(map<int, VertexInfo>& mapGraph, const int num_start_vertex)
+bool
+DepthFirstSearch(map<int, UserInfo>& mapGraph, const int start_user_id,
+                const int end_user_id)
 {
     // 探索中の頂点群を保持するスタック
     stack<int> stkVertex;
     int time(1);
-    auto itr = mapGraph.find(num_start_vertex);
-    itr->second.time_found = time;
+    auto itr = mapGraph.find(start_user_id);
     itr->second.state = Vertex_State::VISITING;
-    stkVertex.push(itr->second.id_vertex);
+    stkVertex.push(itr->second.user_id);
 
     while (stkVertex.size() > 0)
     {
         time++;
         itr = mapGraph.find(stkVertex.top());
+        if (itr->second.user_id == end_user_id) {
+            return true;
+        }
 
         // 隣接する頂点が無かった場合
         if(!IsAnyNoVisitNextVertex(mapGraph,stkVertex.top())) {
-            itr->second.time_complete = time;
             itr->second.state = Vertex_State::COMPLETE;
             stkVertex.pop();
         }
@@ -72,15 +78,14 @@ DepthFirstSearch(map<int, VertexInfo>& mapGraph, const int num_start_vertex)
             // 候補が複数ある場合は最小の物を優先する
             // 訪問済みの物は候補から除外する
             int min(MAX);
-            for(auto vertex : itr->second.vecNextVertex)
+            for(auto vertex : itr->second.vecFriend)
             {
                 auto nextitr = mapGraph.find(vertex);
                 if (nextitr->second.state != Vertex_State::NOT_VISIT) continue;
-                if (min > nextitr->second.id_vertex) min = nextitr->second.id_vertex;
+                if (min > nextitr->second.user_id) min = nextitr->second.user_id;
             }
             itr = mapGraph.find(min);
             itr->second.state = Vertex_State::VISITING;
-            itr->second.time_found = time;
             stkVertex.push(min);
         }
 
@@ -96,25 +101,14 @@ DepthFirstSearch(map<int, VertexInfo>& mapGraph, const int num_start_vertex)
                 // 状態を訪問中に切り替えて、
                 // スタックに詰めて再開する
                 if(vertex.second.state == Vertex_State::NOT_VISIT) {
-                    stkVertex.push(vertex.second.id_vertex);
+                    stkVertex.push(vertex.second.user_id);
                     vertex.second.state = Vertex_State::VISITING;
-                    vertex.second.time_found = time;
                     break;
                 }
             }
         }
     }
-}
-
-// 各頂点の訪問開始・終了時刻を出力する
-void
-PrintResult(map<int, VertexInfo> mapGraph)
-{
-    for(auto vertex : mapGraph)
-    {
-        cout << vertex.second.id_vertex << " " << vertex.second.time_found << " "
-        << vertex.second.time_complete << "\n";
-    }
+    return false;
 }
 
 int
@@ -129,8 +123,6 @@ main()
 
     map<int, UserInfo> mapGraph;
     int num_vertex(0), cnt_exit_vertex(0);
-
-    int num_start_vertex(0);
 
     // 友人関係を保持する
     for (int i = 0; i < num_relation; i++)
@@ -152,20 +144,23 @@ main()
         }
     }
 
-    // 質問を取得
-    int num_question(0),start_user_id(0), end_user_id(0);
+    // 質問を取得する
+    int num_question(0), start_user_id(0), end_user_id(0);
+
+    cin >> num_question;
     for (int i = 0; i < num_question; i++)
     {
         cin >> start_user_id >> end_user_id;
         // たどり着けるかを判定する
+        if (DepthFirstSearch(mapGraph, start_user_id, end_user_id))
+        {
+            cout << "yes" << "\n";
+        }
+        else
+        {
+            cout << "no" << "\n";
+        }
     }
     
-
-    // 深さ優先探索
-    //DepthFirstSearch(mapGraph, num_start_vertex);
-
-    // 結果の出力
-    //PrintResult(mapGraph);
-
     return 0;
 }
