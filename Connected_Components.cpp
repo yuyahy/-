@@ -37,7 +37,7 @@ IsAnyNoVisitNextVertex(map<int, UserInfo>& mapGraph, int num_vertex)
     for(auto vertex : itr->second.vecFriend)
     {
         auto tgtitr = mapGraph.find(vertex);
-        // まだ訪問していない隣接頂点が見つかった
+        // まだ訪問していない隣接頂点が見つかった˜
         if(tgtitr->second.state == Vertex_State::NOT_VISIT) {
             return true;
         }
@@ -49,19 +49,17 @@ IsAnyNoVisitNextVertex(map<int, UserInfo>& mapGraph, int num_vertex)
 // 深さ優先でグラフを探索し、
 // 発見時刻と完了時刻を記録する
 bool
-DepthFirstSearch(map<int, UserInfo>& mapGraph, const int start_user_id,
+DepthFirstSearch(map<int, UserInfo> mapGraph, const int start_user_id,
                 const int end_user_id)
 {
     // 探索中の頂点群を保持するスタック
     stack<int> stkVertex;
-    int time(1);
     auto itr = mapGraph.find(start_user_id);
     itr->second.state = Vertex_State::VISITING;
     stkVertex.push(itr->second.user_id);
 
     while (stkVertex.size() > 0)
     {
-        time++;
         itr = mapGraph.find(stkVertex.top());
         if (itr->second.user_id == end_user_id) {
             return true;
@@ -87,25 +85,6 @@ DepthFirstSearch(map<int, UserInfo>& mapGraph, const int start_user_id,
             itr = mapGraph.find(min);
             itr->second.state = Vertex_State::VISITING;
             stkVertex.push(min);
-        }
-
-        // スタックのサイズが0でも、開始点から直接行けないが
-        // まだ訪問していない頂点が残っている可能性があるので調べる
-        if(stkVertex.size() == 0)
-        {
-            // 頂点の移動が必要なので時間を加算する
-            time++;
-            for(auto& vertex : mapGraph)
-            {
-                // 未訪問の頂点が残っていたら
-                // 状態を訪問中に切り替えて、
-                // スタックに詰めて再開する
-                if(vertex.second.state == Vertex_State::NOT_VISIT) {
-                    stkVertex.push(vertex.second.user_id);
-                    vertex.second.state = Vertex_State::VISITING;
-                    break;
-                }
-            }
         }
     }
     return false;
@@ -140,6 +119,22 @@ main()
             tmpUserInfo.vecFriend.push_back(friend_id);
             // 登録されていないユーザだったら新規追加する
             auto regPair = make_pair(self_id, tmpUserInfo);
+            mapGraph.insert(regPair);
+        }
+
+        // 友達側も登録する
+        if (mapGraph.count(friend_id))
+        {
+            auto itr = mapGraph.find(friend_id);
+            itr->second.vecFriend.push_back(self_id);
+        }
+        else
+        {
+            UserInfo tmpUserInfo;
+            tmpUserInfo.user_id = friend_id;
+            tmpUserInfo.vecFriend.push_back(self_id);
+            // 登録されていないユーザだったら新規追加する
+            auto regPair = make_pair(friend_id, tmpUserInfo);
             mapGraph.insert(regPair);
         }
     }
