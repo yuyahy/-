@@ -4,51 +4,49 @@ typedef long long llong;
 constexpr int MAX = 999999;
 
 // 与えられた重み付きグラフから
-// 最小全域木の辺の重みの総和を計算する
-int CalcMinimumSpanningTree(vector<vector<int>> vecGraph)
+// 最小全域木の辺の重みの総和を計算する(プリム法)
+int CalcMinimumSpanningTree(vector<vector<int>> vecGraph, int size)
 {
     int sum(0);
-    // 辺の選択状態を管理するmap
-    map<int,bool> mapGraph;
-    // 閉路にならない限り
-    // 最小コストの辺を選択していく
-    for (int i = 0; i < vecGraph.size(); i++)
+    // 訪問した頂点を格納する集合
+    set<int> setVistedVertexs;
+
+    // 適当な開始点からスタート
+    // ここでは頂点0とする
+    setVistedVertexs.insert(0);
+
+    // これまでに訪問した頂点から行ける
+    // 未訪問の頂点の中で最小コストな頂点を選択する
+    // これを全ての頂点を訪問するまで繰り返す
+    while (setVistedVertexs.size() != size)
     {
-        int min = MAX;
-        pair<int,int> min_pair(-1,-1);
-
-        if ( mapGraph.size() >= vecGraph.size()-1) return sum;
-
-        for (int j = 0; j < vecGraph.size(); j++)
+        // <頂点番号、コスト>のペア
+        pair<int, int> min;
+        min.first = MAX;
+        for (auto vertex : setVistedVertexs)
         {
-            // 閉路にならないかチェックする
-            // 閉路になる条件は、
-            // 両辺が選択済みの場合
-           // if (mapGraph.count(i) && mapGraph.count(j)) {
-            if (mapGraph.count(j)) {
-                continue;
-            }
-
-            if(vecGraph[i][j] >0 && min > vecGraph[i][j]) {
-                min_pair = make_pair(i,j);
-                min = vecGraph[i][j];
+            for (int i = 0; i < size; i++)
+            {
+                // 訪問済みの辺の場合はスキップ
+                if(setVistedVertexs.count(i)) continue;
+                if (vecGraph[vertex][i] >= 0 && min.first > vecGraph[vertex][i])
+                {
+                    // 最小値ならその値と新規頂点を保持しておく
+                    min.first = vecGraph[vertex][i];
+                    min.second = i;
+                }
             }
         }
-        // 最小コストとなる辺を記録する
-        // auto regpair1 = make_pair(min_pair.first,true);
-        // mapGraph.insert(regpair1);
-        auto regpair2 = make_pair(min_pair.second,true);
-        mapGraph.insert(regpair2);
-        //if (min_pair.first >= 0 && min_pair.second >= 0) {
-        if (min_pair.second >= 0) {
-            sum += min;
-        }
+        // 訪問済み頂点リストに追加
+        setVistedVertexs.insert(min.second);
+        sum += min.first;
     }
     return sum;
 }
 
-int main() {
-    int n(0),tmp(0);
+int main()
+{
+    int n(0), tmp(0);
     cin >> n;
     vector<vector<int>> vecGraph(n, vector<int>(n, 0));
 
@@ -61,5 +59,5 @@ int main() {
         }
     }
 
-    cout << CalcMinimumSpanningTree(vecGraph) << "\n";
+    cout << CalcMinimumSpanningTree(vecGraph, n) << "\n";
 }
