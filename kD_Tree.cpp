@@ -33,6 +33,7 @@ int np;
 bool lessX(const Point &p1, const Point &p2) { return p1.x < p2.x; }
 bool lessY(const Point &p1, const Point &p2) { return p1.y < p2.y; }
 
+// kD木をつくる
 int makeKDTree(int l, int r, int depth) {
     if(!(l<r)) return NIL;
     int mid = (l+r)/2;
@@ -92,5 +93,17 @@ int main() {
     scanf("%d", &q);
     int sx, tx, sy, ty;
     vector<Point> ans;
-    //////
+    for (int i = 0; i < q; i++)
+    {
+        scanf("%d %d %d %d",&sx, &tx, &sy, &ty);
+        ans.clear();
+        find(root, sx, tx, sy, ty, 0, ans);
+        sort(ans.begin(), ans.end());
+        for (int j = 0; j < ans.size(); j++)
+        {
+            ans[j].print();
+        }
+        printf("\n");
+    }
+    return 0;
 }
